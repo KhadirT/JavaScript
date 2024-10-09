@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çalışan Yönetim Sistemi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Çalışan Yönetim Sistemi</h1>
+
+    <h2>Çalışan Ekle</h2>
+    <input type="text" id="isim" placeholder="İsim">
+    <input type="number" id="yas" placeholder="Yaş">
+    <input type="text" id="departman" placeholder="Departman">
+    <input type="number" id="maas" placeholder="Maaş">
+    <button onclick="calisanEkle()">Ekle</button>
+
+    <h2>Çalışanları Listele</h2>
+    <input type="text" id="departmanFiltre" placeholder="Departman Filtrele">
+    <button onclick="calisanListele()">Listele</button>
+    <div id="liste"></div>
+
+    <h2>Maaşa Göre Filtrele</h2>
+    <input type="number" id="maasLimiti" placeholder="Maaş Limiti">
+    <button onclick="maasiAltindaListele()">Listele</button>
+    <div id="maasListe"></div>
+
+    <h2>En Yüksek Maaşlı Çalışanı Bul</h2>
+    <button onclick="enYuksekMaasliCalisan()">Bul</button>
+    <div id="enYuksek"></div>
+
+    <h2>Toplam Maaş Hesapla</h2>
+    <input type="text" id="toplamDepartman" placeholder="Departman">
+    <button onclick="toplamMaasHesapla()">Hesapla</button>
+    <div id="toplamSonuc"></div>
+
+    <script>
+
+        let calisanlar = [];
+
+        function calisanEkle() {
+            const isim = document.getElementById('isim').value;
+            const yas = parseInt(document.getElementById('yas').value);
+            const departman = document.getElementById('departman').value;
+            const maas = parseFloat(document.getElementById('maas').value);
+            
+            // Hatalı giriş kontrolü
+            if (!isim || yas < 18 || maas < 0) {
+                alert("Hata: İsim boş olamaz, yaş 18'den küçük olamaz ve maaş negatif olamaz.");
+                return;
+            }
+
+            // Aynı isimde çalışan kontrolü
+            for (let calisan of calisanlar) {
+                if (calisan.isim === isim) {
+                    alert("Hata: Bu isimde bir çalışan zaten mevcut.");
+                    return;
+                }
+            }
+
+
+            calisanlar.push({ isim, yas, departman, maas });
+            alert(`${isim} adlı çalışan başarıyla eklendi.`);
+
+            document.getElementById('isim').value = '';
+            document.getElementById('yas').value = '';
+            document.getElementById('departman').value = '';
+            document.getElementById('maas').value = '';
+        }
+
+        function calisanListele() {
+            const departman = document.getElementById('departmanFiltre').value;
+            const listeDiv = document.getElementById('liste');
+            listeDiv.innerHTML = ''; 
+
+            const filtreliCalisanlar = departman ? calisanlar.filter(c => c.departman === departman) : calisanlar;
+
+            if (filtreliCalisanlar.length === 0) {
+                listeDiv.innerHTML = 'Bu departmanda çalışan bulunmamaktadır.';
+                return;
+            }
+
+            filtreliCalisanlar.forEach(calisan => {
+                listeDiv.innerHTML += `İsim: ${calisan.isim}, Yaş: ${calisan.yas}, Departman: ${calisan.departman}, Maaş: ${calisan.maas}<br>`;
+            });
+        }
+
+        // Maaşa göre filtreleme
+        function maasiAltindaListele() {
+            const maasLimiti = parseFloat(document.getElementById('maasLimiti').value);
+            const maasListeDiv = document.getElementById('maasListe');
+            maasListeDiv.innerHTML = ''; // Önceki listeyi temizle
+
+            const altindaCalisanlar = calisanlar.filter(calisan => calisan.maas < maasLimiti);
+            if (altindaCalisanlar.length === 0) {
+                maasListeDiv.innerHTML = "Maaşı belirtilen limitin altında çalışan bulunmamaktadır.";
+                return;
+            }
+            
+            altindaCalisanlar.forEach(calisan => {
+                maasListeDiv.innerHTML += `İsim: ${calisan.isim}, Maaş: ${calisan.maas}<br>`;
+            });
+        }
+
+        // En yüksek maaşlı çalışanı bulma
+        function enYuksekMaasliCalisan() {
+            const enYuksekDiv = document.getElementById('enYuksek');
+            enYuksekDiv.innerHTML = ''; // Önceki sonucu temizle
+
+            if (calisanlar.length === 0) {
+                enYuksekDiv.innerHTML = "Hiç çalışan yok.";
+                return;
+            }
+            
+            const enYuksek = calisanlar.reduce((prev, curr) => (prev.maas > curr.maas) ? prev : curr);
+            enYuksekDiv.innerHTML = `En yüksek maaşlı çalışan: ${enYuksek.isim}, Maaş: ${enYuksek.maas}`;
+        }
+
+        // Toplam maaş hesaplama
+        function toplamMaasHesapla() {
+            const departman = document.getElementById('toplamDepartman').value;
+            const toplamDiv = document.getElementById('toplamSonuc');
+            toplamDiv.innerHTML = ''; // Önceki sonucu temizle
+
+            const filtreliCalisanlar = departman ? calisanlar.filter(c => c.departman === departman) : calisanlar;
+
+            const toplamMaaş = filtreliCalisanlar.reduce((total, calisan) => total + calisan.maas, 0);
+
+            if (filtreliCalisanlar.length === 0) {
+                toplamDiv.innerHTML = "Bu departmanda çalışan yok.";
+            } else {
+                toplamDiv.innerHTML = `Toplam maaş: ${toplamMaaş} TL`;
+            }
+        }
+    </script>
+
+</body>
+</html>
